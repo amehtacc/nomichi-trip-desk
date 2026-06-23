@@ -178,12 +178,21 @@ export default async function DashboardPage() {
               description="New traveller enquiries will appear here as soon as someone sends the public form."
             />
           ) : (
-            <div className="divide-y divide-sand/40">
+            <div>
+              <div className="hidden rounded-md bg-[#f4eadb] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/54 md:grid md:grid-cols-[44px_minmax(130px,1fr)_minmax(170px,1.25fr)_110px_80px_44px] md:items-center md:gap-3">
+                <span />
+                <span>Traveller</span>
+                <span>Trip</span>
+                <span>Status</span>
+                <span>Created</span>
+                <span>Owner</span>
+              </div>
+              <div className="mt-2 divide-y divide-sand/40">
               {metrics.recentLeads.map((lead) => (
                 <Link
                   key={lead.id}
                   href={`/admin/leads/${lead.id}`}
-                  className="grid grid-cols-[40px_1fr_auto] items-center gap-4 py-3 transition-colors duration-300 ease-out hover:bg-primary/5"
+                  className="grid grid-cols-[40px_1fr_auto] items-center gap-4 rounded-md px-2 py-3 transition-colors duration-300 ease-out hover:bg-primary/5 md:grid-cols-[44px_minmax(130px,1fr)_minmax(170px,1.25fr)_110px_80px_44px] md:gap-3"
                 >
                   <span className="grid size-9 place-items-center rounded-full bg-[#f9ded3] text-xs font-semibold text-ink">
                     {lead.name
@@ -193,21 +202,25 @@ export default async function DashboardPage() {
                       .join("")
                       .toUpperCase()}
                   </span>
-                  <div className="grid gap-1 md:grid-cols-[1fr_1.2fr_auto] md:items-center">
-                    <p className="font-medium">{lead.name}</p>
-                    <p className="truncate text-sm text-ink/60">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{lead.name}</p>
+                    <p className="mt-1 truncate text-xs text-ink/52 md:hidden">
                       {lead.trips?.name ?? "Trip not selected"}
                     </p>
-                    <StatusPill status={lead.status} />
                   </div>
-                  <div className="hidden items-center gap-3 text-sm text-ink/56 sm:flex">
-                    <span>{relativeTime(lead.created_at)}</span>
-                    <span className="grid size-7 place-items-center rounded-full bg-[#e8edce] text-[10px] font-bold text-olive">
-                      {initials(lead.profiles?.name ?? lead.profiles?.email ?? "NT")}
-                    </span>
-                  </div>
+                  <p className="hidden truncate text-sm text-ink/60 md:block">
+                    {lead.trips?.name ?? "Trip not selected"}
+                  </p>
+                  <StatusPill status={lead.status} />
+                  <span className="hidden text-sm text-ink/56 md:block">
+                    {relativeTime(lead.created_at)}
+                  </span>
+                  <span className="hidden size-7 place-items-center rounded-full bg-[#e8edce] text-[10px] font-bold text-olive md:grid">
+                    {initials(lead.profiles?.name ?? lead.profiles?.email ?? "NT")}
+                  </span>
                 </Link>
               ))}
+              </div>
             </div>
           )}
         </Panel>
