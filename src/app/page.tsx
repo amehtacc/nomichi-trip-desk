@@ -11,7 +11,11 @@ import {
 import { AutoDismissMessage } from "@/components/auto-dismiss-message"
 import { EnquiryForm } from "@/components/public/enquiry-form"
 import { MobileMenu } from "@/components/public/mobile-menu"
-import { PublicFooter, PublicTripCard } from "@/components/public/public-shell"
+import {
+  PublicFinalCta,
+  PublicFooter,
+  PublicTripCard,
+} from "@/components/public/public-shell"
 import { Button } from "@/components/ui/button"
 import { getOpenTrips } from "@/lib/data"
 import { hasSupabaseConfig } from "@/lib/supabase/config"
@@ -95,7 +99,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <FinalCta />
+      <PublicFinalCta />
 
       <PublicFooter />
     </main>
@@ -279,54 +283,5 @@ function TornHeroSeparator() {
         d="M0 95L32 96C64 97 128 99 192 97C256 95 320 89 384 87C448 85 512 87 576 85C640 83 704 76 768 84C832 92 896 115 960 118C1024 121 1088 104 1152 91C1216 78 1280 69 1344 70C1408 71 1432 77 1440 79V132H0V95Z"
       />
     </svg>
-  )
-}
-
-function FinalCta() {
-  return (
-    <section className="w-full border-t border-sand/55 bg-cream">
-      <div className="relative overflow-hidden">
-        <Image
-          src="/images/hero-girl.png"
-          alt=""
-          fill
-          sizes="100vw"
-          aria-hidden="true"
-          className="object-cover object-center opacity-90"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(28,27,26,0.9)_0%,rgba(28,27,26,0.82)_38%,rgba(69,71,29,0.62)_62%,rgba(28,27,26,0.18)_100%)]" />
-        <Image
-          src="/images/hills-sun-birds.png"
-          alt=""
-          width={550}
-          height={250}
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-0 z-[1] w-[360px] max-w-none select-none opacity-75 mix-blend-screen sm:w-[460px]"
-        />
-        <div className="relative z-10 mx-auto grid min-h-[350px] max-w-[1440px] items-center gap-8 px-4 py-12 sm:px-6 lg:px-8 xl:grid-cols-[1fr_auto] xl:px-10">
-          <div className="max-w-2xl lg:pb-0">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-yellow">
-              Travel that finds you
-            </p>
-            <h2 className="mt-4 font-display text-4xl font-extrabold leading-tight text-cream sm:text-5xl">
-              Tell us what kind of journey you are hoping for.
-            </h2>
-            <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-cream/92 drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)] sm:text-base">
-              Share a few details and the Nomichi team will help you find the
-              trip that fits your pace, people, and season.
-            </p>
-          </div>
-          <Button
-            asChild
-            className="h-16 w-fit rounded-md bg-primary px-12 text-lg font-extrabold text-cream shadow-lg shadow-ink/20 hover:bg-ink"
-          >
-            <a href="#enquiry">
-              Send Enquiry
-              <ArrowRight className="size-5" />
-            </a>
-          </Button>
-        </div>
-      </div>
-    </section>
   )
 }

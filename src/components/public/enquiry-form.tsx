@@ -1,6 +1,13 @@
 "use client"
 
-import { type FormEvent, useEffect, useMemo, useState, useTransition } from "react"
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight, Clock3 } from "lucide-react"
@@ -55,6 +62,17 @@ const validationOrder: Array<keyof EnquiryValues> = [
   "preferred_month",
 ]
 
+function tripIdFromLocation() {
+  const searchTripId = new URLSearchParams(window.location.search).get("trip")
+  if (searchTripId) return searchTripId
+
+  const hash = window.location.hash.replace(/^#/, "")
+  const hashParams = new URLSearchParams(
+    hash.startsWith("enquiry&") ? hash.replace(/^enquiry&/, "") : hash
+  )
+  return hashParams.get("trip")
+}
+
 export function EnquiryForm({
   trips,
   disabled,
@@ -65,6 +83,7 @@ export function EnquiryForm({
   const [state, setState] = useState<ActionState>(initialActionState)
   const [isPending, startTransition] = useTransition()
   const defaultTrip = trips[0]?.id ?? ""
+  const [selectedTrip, setSelectedTrip] = useState(defaultTrip)
 
   const {
     register,
@@ -87,28 +106,17 @@ export function EnquiryForm({
     },
   })
 
-  useEffect(() => {
-    setValue("trip_id", defaultTrip)
-  }, [defaultTrip, setValue])
-
-  useEffect(() => {
-    function applyTripFromHash() {
-      const params = new URLSearchParams(window.location.hash.replace(/^#/, ""))
-      const tripId = params.get("trip")
-
-      if (tripId && trips.some((trip) => trip.id === tripId)) {
-        setValue("trip_id", tripId, { shouldValidate: true })
-        document.getElementById("enquiry")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-      }
-    }
-
-    applyTripFromHash()
-    window.addEventListener("hashchange", applyTripFromHash)
-    return () => window.removeEventListener("hashchange", applyTripFromHash)
-  }, [setValue, trips])
+  const updateSelectedTrip = useCallback(
+    (value: string, shouldValidate: boolean) => {
+      setSelectedTrip(value)
+      setValue("trip_id", value, {
+        shouldDirty: shouldValidate,
+        shouldTouch: shouldValidate,
+        shouldValidate,
+      })
+    },
+    [setValue]
+  )
 
   useEffect(() => {
     if (state.ok) {
@@ -121,8 +129,44 @@ export function EnquiryForm({
         preferred_month: "",
         expectation: "",
       })
+      const timer = window.setTimeout(() => updateSelectedTrip(defaultTrip, false), 0)
+      return () => window.clearTimeout(timer)
     }
-  }, [defaultTrip, reset, state.ok])
+  }, [defaultTrip, reset, state.ok, updateSelectedTrip])
+
+  useEffect(() => {
+    const tripId = tripIdFromLocation()
+    const validTripId =
+      tripId && trips.some((trip) => trip.id === tripId) ? tripId : defaultTrip
+
+    const timer = window.setTimeout(
+      () => updateSelectedTrip(validTripId, Boolean(tripId)),
+      0
+    )
+    return () => window.clearTimeout(timer)
+  }, [defaultTrip, trips, updateSelectedTrip])
+
+  useEffect(() => {
+    function applyTripFromHash() {
+      const tripId = tripIdFromLocation()
+
+      if (tripId && trips.some((trip) => trip.id === tripId)) {
+        updateSelectedTrip(tripId, true)
+        document.getElementById("enquiry")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      }
+    }
+
+    applyTripFromHash()
+    window.addEventListener("hashchange", applyTripFromHash)
+    window.addEventListener("popstate", applyTripFromHash)
+    return () => {
+      window.removeEventListener("hashchange", applyTripFromHash)
+      window.removeEventListener("popstate", applyTripFromHash)
+    }
+  }, [trips, updateSelectedTrip])
 
   const fieldMessages = useMemo(() => {
     return state.fieldErrors ?? {}
@@ -130,13 +174,24 @@ export function EnquiryForm({
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const urlTripId = tripIdFromLocation()
+    const validUrlTripId =
+      urlTripId && trips.some((trip) => trip.id === urlTripId) ? urlTripId : ""
+    const tripForSubmit = selectedTrip || validUrlTripId || defaultTrip
+
+    updateSelectedTrip(tripForSubmit, true)
+    setValue("trip_id", tripForSubmit, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    })
 
     for (const field of validationOrder) {
       const isValid = await trigger(field, { shouldFocus: true })
       if (!isValid) return
     }
 
-    const values = getValues()
+    const values = { ...getValues(), trip_id: tripForSubmit }
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
       formData.set(key, value ?? "")
@@ -147,7 +202,6 @@ export function EnquiryForm({
     })
   }
 
-  const selectedTrip = useWatch({ control, name: "trip_id" })
   const selectedGroup = useWatch({ control, name: "group_type" })
 
   return (
@@ -215,10 +269,9 @@ export function EnquiryForm({
               Select Trip <span className="text-primary">*</span>
             </span>
             <Select
-              value={selectedTrip}
-              onValueChange={(value) =>
-                setValue("trip_id", value, { shouldValidate: true })
-              }
+              key={selectedTrip || "trip-select"}
+              value={selectedTrip || defaultTrip}
+              onValueChange={(value) => updateSelectedTrip(value, true)}
               disabled={disabled || isPending || trips.length === 0}
             >
               <SelectTrigger className={selectClass}>

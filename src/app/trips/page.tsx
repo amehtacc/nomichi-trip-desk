@@ -1,7 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Search, SlidersHorizontal } from "lucide-react"
-import { PublicFooter, PublicTripCard } from "@/components/public/public-shell"
+import { ArrowRight } from "lucide-react"
+import { PublicFinalCta, PublicFooter, PublicTripCard } from "@/components/public/public-shell"
+import { TripBrowserFilters } from "@/components/public/trip-browser-filters"
 import { Button } from "@/components/ui/button"
 import { getOpenTrips } from "@/lib/data"
 import type { Trip } from "@/lib/types"
@@ -52,81 +53,25 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       </header>
 
       <section className="mx-auto max-w-[1440px] px-4 pb-14 pt-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
-              Open trips
-            </p>
-            <h1 className="mt-4 max-w-3xl font-display text-5xl font-extrabold leading-tight text-ink sm:text-6xl">
-              Browse slow journeys that are open now.
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/70 sm:text-base">
-              Search by place, filter by destination, and choose the trip that
-              feels closest to the season you are in.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-sand/50 bg-card/80 p-5 soft-paper-shadow">
-            <p className="font-display text-2xl font-bold">
-              {visibleTrips.length} open{" "}
-              {visibleTrips.length === 1 ? "trip" : "trips"}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-ink/65">
-              Every trip here is created by the Nomichi team and open for new
-              enquiries.
-            </p>
-          </div>
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
+            Open trips
+          </p>
+          <h1 className="mt-4 max-w-3xl font-display text-5xl font-extrabold leading-tight text-ink sm:text-6xl">
+            Browse slow journeys that are open now.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-ink/70 sm:text-base">
+            Search by place, filter by destination, and choose the trip that
+            feels closest to the season you are in.
+          </p>
         </div>
 
-        <form className="mt-10 grid gap-3 rounded-2xl border border-sand/50 bg-card/85 p-4 soft-paper-shadow lg:grid-cols-[1fr_240px_220px_auto]">
-          <label className="relative">
-            <span className="sr-only">Search trips</span>
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink/50" />
-            <input
-              name="q"
-              defaultValue={query}
-              placeholder="Search trips or destinations..."
-              className="h-12 w-full rounded-md border border-sand/55 bg-cream/95 pl-11 pr-4 text-sm shadow-sm outline-none transition-all duration-300 ease-out focus:border-primary focus:ring-3 focus:ring-primary/15"
-            />
-          </label>
-
-          <label>
-            <span className="sr-only">Destination</span>
-            <select
-              name="destination"
-              defaultValue={destination}
-              className="h-12 w-full cursor-pointer rounded-md border border-sand/55 bg-cream/95 px-4 text-sm shadow-sm outline-none transition-all duration-300 ease-out focus:border-primary focus:ring-3 focus:ring-primary/15"
-            >
-              <option value="">All destinations</option>
-              {destinations.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span className="sr-only">Sort trips</span>
-            <select
-              name="sort"
-              defaultValue={sort}
-              className="h-12 w-full cursor-pointer rounded-md border border-sand/55 bg-cream/95 px-4 text-sm shadow-sm outline-none transition-all duration-300 ease-out focus:border-primary focus:ring-3 focus:ring-primary/15"
-            >
-              <option value="soonest">Soonest first</option>
-              <option value="price-low">Price low to high</option>
-              <option value="price-high">Price high to low</option>
-              <option value="seats-low">Fewest seats left</option>
-            </select>
-          </label>
-
-          <Button
-            type="submit"
-            className="h-12 rounded-md bg-primary px-6 text-cream shadow-sm hover:bg-ink"
-          >
-            <SlidersHorizontal className="size-4" />
-            Apply
-          </Button>
-        </form>
+        <TripBrowserFilters
+          query={query}
+          destination={destination}
+          sort={sort}
+          destinations={destinations}
+        />
 
         {visibleTrips.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-sand bg-card p-10 text-center">
@@ -156,6 +101,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
         )}
       </section>
 
+      <PublicFinalCta />
       <PublicFooter />
     </main>
   )
