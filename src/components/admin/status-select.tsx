@@ -46,10 +46,10 @@ export function StatusSelect({
   return (
     <div className="space-y-1">
       <Select value={value} onValueChange={changeStatus} disabled={isPending}>
-        <SelectTrigger className="!h-10 min-h-10 w-full min-w-36 rounded-md border-sand/60 bg-card px-3 text-sm shadow-sm">
+        <SelectTrigger className="!h-9 min-h-9 w-full min-w-36 rounded-md border-primary/10 bg-primary/10 px-3 text-xs font-bold uppercase tracking-[0.04em] text-primary shadow-none transition-colors duration-300 hover:border-primary/25 hover:bg-primary/15">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent position="popper" sideOffset={8}>
+        <SelectContent position="popper" sideOffset={8} className="max-h-64">
           {leadStatuses.map((item) => (
             <SelectItem key={item} value={item}>
               {statusLabels[item]}

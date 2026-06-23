@@ -50,8 +50,21 @@ export type Note = {
 }
 
 export type LeadWithTripOwner = Lead & {
-  trips: Pick<Trip, "id" | "name" | "destination" | "image_url"> | null
+  trips:
+    | Pick<
+        Trip,
+        | "id"
+        | "name"
+        | "destination"
+        | "start_date"
+        | "end_date"
+        | "price"
+        | "total_seats"
+        | "image_url"
+      >
+    | null
   profiles: Pick<Profile, "id" | "name" | "email"> | null
+  trip_confirmed_count?: number
 }
 
 export type NoteWithAuthor = Note & {

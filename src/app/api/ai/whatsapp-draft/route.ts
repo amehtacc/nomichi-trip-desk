@@ -3,6 +3,7 @@ import { getLead, requireUser } from "@/lib/data"
 
 type RequestBody = {
   lead_id?: string
+  tone?: string
 }
 
 export async function POST(request: Request) {
@@ -16,6 +17,9 @@ export async function POST(request: Request) {
     )
   }
 
+  const tone =
+    body.tone === "calm" || body.tone === "concise" ? body.tone : "friendly"
+
   const lead = await getLead(body.lead_id)
   if (!lead) {
     return NextResponse.json({ error: "Lead not found." }, { status: 404 })
@@ -24,6 +28,7 @@ export async function POST(request: Request) {
   const prompt = [
     "Write a first WhatsApp message for a Nomichi travel associate.",
     "Requirements: warm, short, human sounding, calm, specific, no emojis, no marketing language, no exclamation marks.",
+    `Tone: ${tone}.`,
     `Traveller name: ${lead.name}`,
     `Trip name: ${lead.trips?.name ?? "Selected trip"}`,
     `Destination: ${lead.trips?.destination ?? "Destination"}`,
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
         trip: lead.trips?.name ?? "the trip",
         destination: lead.trips?.destination ?? "the destination",
         expectation: lead.expectation,
+        tone,
       }),
     })
   } catch (error) {
@@ -141,15 +147,24 @@ function fallbackDraft({
   trip,
   destination,
   expectation,
+  tone,
 }: {
   name: string
   trip: string
   destination: string
   expectation: string
+  tone: string
 }) {
+  const opener =
+    tone === "concise"
+      ? `Hi ${name}, this is Nomichi.`
+      : tone === "calm"
+        ? `Hi ${name}, this is from Nomichi. I read your enquiry carefully.`
+        : `Hi ${name}, this is from Nomichi.`
+
   if (!expectation.trim()) {
-    return `Hi ${name}, this is from Nomichi. Thanks for asking about ${trip} in ${destination}. I would love to understand what pace, comfort, and kind of group you have in mind before suggesting the next step.`
+    return `${opener} Thanks for asking about ${trip} in ${destination}. I would love to understand what pace, comfort, and kind of group you have in mind before suggesting the next step.`
   }
 
-  return `Hi ${name}, this is from Nomichi. I read your note about wanting ${expectation.toLowerCase()}. ${trip} in ${destination} could be a good fit. I would love to understand what pace and comfort you have in mind before suggesting the next step.`
+  return `${opener} I read your note about wanting ${expectation.toLowerCase()}. ${trip} in ${destination} could be a good fit. I would love to understand what pace and comfort you have in mind before suggesting the next step.`
 }

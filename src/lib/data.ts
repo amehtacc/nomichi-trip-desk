@@ -160,19 +160,38 @@ export async function getLead(id: string): Promise<LeadWithTripOwner | null> {
   noStore()
 
   if (!hasSupabaseConfig()) {
-    return demoLeads.find((lead) => lead.id === id) ?? null
+    const lead = demoLeads.find((item) => item.id === id)
+    if (!lead) return null
+    const confirmedCount = demoLeads.filter(
+      (item) => item.trip_id === lead.trip_id && item.status === "CONFIRMED"
+    ).length
+    return { ...lead, trip_confirmed_count: confirmedCount }
   }
 
   await requireUser()
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("leads")
-    .select("*, trips(id,name,destination,image_url), profiles(id,name,email)")
+    .select(
+      "*, trips(id,name,destination,start_date,end_date,price,total_seats,image_url), profiles(id,name,email)"
+    )
     .eq("id", id)
     .maybeSingle()
 
   if (error) throw new Error(error.message)
-  return data as LeadWithTripOwner | null
+  if (!data) return null
+
+  const { count, error: countError } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("trip_id", data.trip_id)
+    .eq("status", "CONFIRMED")
+
+  if (countError) throw new Error(countError.message)
+  return {
+    ...(data as LeadWithTripOwner),
+    trip_confirmed_count: count ?? 0,
+  }
 }
 
 export async function getNotes(leadId: string): Promise<NoteWithAuthor[]> {
